@@ -1,5 +1,6 @@
 package com.example.BankApplication.service;
 
+import com.example.BankApplication.Authentication.EmailMatching;
 import com.example.BankApplication.DTO.AccountResponseDTO;
 import com.example.BankApplication.entity.Account;
 import com.example.BankApplication.entity.Transactions;
@@ -7,10 +8,14 @@ import com.example.BankApplication.entity.User;
 import com.example.BankApplication.repository.AccountsRepo;
 import com.example.BankApplication.repository.TransactionsRepo;
 import com.example.BankApplication.repository.UserRepository;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,8 +29,14 @@ public class AccountService {
     private UserRepository userRepository;
     @Autowired
     private TransactionsRepo repo;
+    @Autowired
+    private EmailMatching emailMatching;
     public AccountResponseDTO addAccount( long id,Account a){
         User user= userRepository.findById(id).orElseThrow(()->new RuntimeException("user not found"));
+        String email= emailMatching.emailMatching();
+        if(!user.getEmail().equals(email)){
+            throw new RuntimeException("user credentials does not match");
+        }
         a.setUser(user);
         Account saved=accountsRepo.save(a);
         AccountResponseDTO response=new AccountResponseDTO();
@@ -34,8 +45,9 @@ public class AccountService {
         response.setBalance(saved.getBalance());
         return response;
     }
-    public List<AccountResponseDTO> getAccounts(long id){
-        User user=userRepository.findById(id).orElseThrow(()->new RuntimeException("user not found"));
+    public List<AccountResponseDTO> getAccounts(){
+        String email= emailMatching.emailMatching();
+        User user=userRepository.findByEmail(email);
         List<Account> l;
 
             l = user.getAccounts();
@@ -52,12 +64,19 @@ public class AccountService {
 
         return response;
     }
-    public AccountResponseDTO deposit(double amount,String accountNo){
-        if(amount<=0){
-            throw new RuntimeException();
-        }
+    public AccountResponseDTO deposit(BigDecimal amount, String accountNo){
+
+
+        String email= emailMatching.emailMatching();
+
         Account a=accountsRepo.findByAccountNo(accountNo).orElseThrow(()->new RuntimeException("account not found"));
-        a.setBalance(a.getBalance()+amount);
+        if(!a.getUser().getEmail().equals(email)){
+            throw new RuntimeException("user credentials doesn't match");
+        }
+        if(amount.compareTo(BigDecimal.ZERO)<=0){
+            throw new RuntimeException("amount must be greater than zero");
+        }
+        a.setBalance(a.getBalance().add(amount));
         accountsRepo.save(a);
         Transactions t=new Transactions();
         t.setToAccount(accountNo);
@@ -74,13 +93,17 @@ public class AccountService {
         responseDTO.setId(a.getId());
         return responseDTO;
     }
-    public AccountResponseDTO withdraw(double amount,String accountNo){
-        if(amount<=0){
-            throw new RuntimeException();
-        }
+    public AccountResponseDTO withdraw(BigDecimal amount,String accountNo){
+        String email= emailMatching.emailMatching();
         Account a=accountsRepo.findByAccountNo(accountNo).orElseThrow(()->new RuntimeException("account not found"));
-        if(a.getBalance()>=amount) {
-            a.setBalance(a.getBalance() - amount);
+        if(!a.getUser().getEmail().equals(email)){
+            throw new RuntimeException("user credentials doesn't match");
+        }
+        if(amount.compareTo(BigDecimal.ZERO)<=0){
+            throw new RuntimeException("amount must be greater than zero");
+        }
+        if(a.getBalance().compareTo(amount)>=0) {
+            a.setBalance(a.getBalance().subtract(amount));
             accountsRepo.save(a);
 
             Transactions t = new Transactions();
@@ -97,8 +120,12 @@ public class AccountService {
         responseDTO.setId(a.getId());
         return responseDTO;
     }
-    public double getBalance(String accountNo){
+    public BigDecimal getBalance(String accountNo){
+        String email= emailMatching.emailMatching();
         Account account=accountsRepo.findByAccountNo(accountNo).orElseThrow(()->new RuntimeException("account not found"));
+        if(!account.getUser().getEmail().equals(email)){
+            throw new RuntimeException("user credentials doesn't match");
+        }
         return account.getBalance();
     }
 }

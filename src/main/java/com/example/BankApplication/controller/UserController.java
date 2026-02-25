@@ -1,5 +1,6 @@
 package com.example.BankApplication.controller;
 
+import com.example.BankApplication.DTO.LoginDetailsDTO;
 import com.example.BankApplication.DTO.UserResponseDTO;
 import com.example.BankApplication.entity.User;
 import com.example.BankApplication.service.UserService;
@@ -21,6 +22,11 @@ public class UserController {
     @GetMapping("/Users")
     public List<UserResponseDTO> getUsers(){
         return userService.getUsers();
+    }
+
+    @PostMapping(path="/login",consumes={"application/json"})
+    public String verify(@RequestBody LoginDetailsDTO login){
+        return userService.verify(login);
     }
 
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +22,7 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
     @PostMapping(path="doTransaction/{fromAccount}/{toAccount}/{amount}",consumes={"application/json"})
-    public Transactions doTransaction(@PathVariable String fromAccount,@PathVariable String toAccount,@PathVariable double amount){
+    public Transactions doTransaction(@PathVariable String fromAccount,@PathVariable String toAccount,@PathVariable BigDecimal amount){
 
             return transactionService.doTransaction(fromAccount, toAccount, amount);
 
@@ -37,7 +38,5 @@ public class TransactionController {
     public List<Transactions> getTransactionsByAccountNo(@PathVariable String accountNo){
 
             return transactionService.transactionsHistory(accountNo);
-
-
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -17,7 +18,7 @@ public class Transactions {
     private long id;
     private String fromAccount;
     private String toAccount;
-    private double amount;
+    private BigDecimal amount;
     private Date time;
     private String status;
     public Transactions() {

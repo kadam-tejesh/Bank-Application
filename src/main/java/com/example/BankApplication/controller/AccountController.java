@@ -8,6 +8,7 @@ import com.example.BankApplication.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,22 +20,22 @@ public class AccountController {
     public AccountResponseDTO addAccount(@PathVariable("id") long id, @RequestBody Account a){
        return accountService.addAccount(id,a);
     }
-    @GetMapping(path="Accounts/{id}")
-    public List<AccountResponseDTO> getAccounts(@PathVariable("id") long id){
-        List<AccountResponseDTO> l=accountService.getAccounts(id);
+    @GetMapping(path="/Accounts")
+    public List<AccountResponseDTO> getAccounts(){
+        List<AccountResponseDTO> l=accountService.getAccounts();
 
         return l;
     }
     @PostMapping(path="deposit/{amount}/{accountNo}")
-    public AccountResponseDTO deposit(@PathVariable double amount,@PathVariable String accountNo){
+    public AccountResponseDTO deposit(@PathVariable BigDecimal amount,@PathVariable String accountNo){
         return accountService.deposit(amount,accountNo);
     }
     @PostMapping(path="withdraw/{amount}/{accountNo}")
-    public AccountResponseDTO withdraw(@PathVariable double amount,@PathVariable String accountNo){
+    public AccountResponseDTO withdraw(@PathVariable BigDecimal amount,@PathVariable String accountNo){
         return accountService.withdraw(amount,accountNo);
     }
     @GetMapping(path="getBalance/{accountNo}")
-    public double getBalance(@PathVariable String accountNo){
+    public BigDecimal getBalance(@PathVariable String accountNo){
         return accountService.getBalance(accountNo);
     }
 }

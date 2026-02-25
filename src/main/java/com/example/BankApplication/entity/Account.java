@@ -3,6 +3,7 @@ package com.example.BankApplication.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 
 
 @Entity
@@ -14,10 +15,14 @@ public class Account {
     private long id;
     @Column(unique = true)
     private String accountNo;
-    private double balance;
+    private BigDecimal balance;
+
+    @Version
+    private Long version;
     @ManyToOne
     @JoinColumn(name="user_id")
     private User user;
+
 
 
 
