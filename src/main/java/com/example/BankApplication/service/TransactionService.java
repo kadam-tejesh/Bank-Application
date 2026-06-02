@@ -43,7 +43,7 @@ public class TransactionService {
             repo.save(fromAccount);
             repo.save(toAccount);
         }
-        catch(Exception e){
+        catch(Exception e){;
             throw new RuntimeException("concurrency update detected");
         }
         Transactions transactions=new Transactions();
